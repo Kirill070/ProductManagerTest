@@ -29,12 +29,12 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
         $product = Product::create($request->validated());
-
+        
         // TODO: Отправка уведомления через Job
-
+        
         return redirect()->route('products.index')
             ->with('success', 'Продукт успешно создан');
     }
@@ -42,7 +42,7 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Product $product)
     {
         return view('products.show', compact('product'));
     }
@@ -50,7 +50,7 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Product $product)
     {
         return view('products.edit', compact('product'));
     }
@@ -58,10 +58,10 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProductRequest $request, Product $product)
     {
         $product->update($request->validated());
-
+        
         return redirect()->route('products.index')
             ->with('success', 'Продукт успешно обновлен');
     }
@@ -69,10 +69,10 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Product $product)
     {
         $product->delete();
-
+        
         return redirect()->route('products.index')
             ->with('success', 'Продукт успешно удален');
     }
