@@ -3,35 +3,31 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateProductRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
-        $rules = [
-            'name' => 'required|string|min:10|max:255',
-            'status' => 'required|in:available,unavailable',
-            'data' => 'nullable|array',
+        $product = $this->route('product');
+
+        return [
+            'name'    => ['sometimes', 'required', 'string', 'min:10', 'max:255'],
+            'status'  => ['sometimes', 'required', Rule::in(['available','unavailable'])],
+            'data'    => ['nullable', 'array'],
+
+            'article' => [
+                Rule::prohibitedIf(config('products.role') !== 'admin'),
+                Rule::when(config('products.role') === 'admin', [
+                    'required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9]+$/',
+                    Rule::unique('products', 'article')->ignore($product?->id),
+                ]),
+            ],
         ];
-
-        // Только админ может редактировать артикул
-        if (config('products.role') === 'admin') {
-            $rules['article'] = 'required|string|regex:/^[a-zA-Z0-9]+$/|unique:products,article,' . $this->route('product')->id;
-        }
-
-        return $rules;
     }
 }
