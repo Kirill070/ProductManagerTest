@@ -14,7 +14,10 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::paginate(10);
+        $products = Product::query()
+            ->available()
+            ->latest()
+            ->paginate(10);
         return view('products.index', compact('products'));
     }
 
@@ -33,9 +36,8 @@ class ProductController extends Controller
     {
         $product = Product::create($request->validated());
         
-        // TODO: Отправка уведомления через Job
-        
-        return redirect()->route('products.index')
+        return redirect()
+            ->route('products.show', $product)
             ->with('success', 'Продукт успешно создан');
     }
 
@@ -62,7 +64,8 @@ class ProductController extends Controller
     {
         $product->update($request->validated());
         
-        return redirect()->route('products.index')
+        return redirect()
+            ->route('products.show', $product)
             ->with('success', 'Продукт успешно обновлен');
     }
 
@@ -73,7 +76,8 @@ class ProductController extends Controller
     {
         $product->delete();
         
-        return redirect()->route('products.index')
+        return redirect()
+            ->route('products.index')
             ->with('success', 'Продукт успешно удален');
     }
 }
