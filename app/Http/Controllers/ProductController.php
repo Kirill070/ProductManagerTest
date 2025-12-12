@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use Illuminate\Http\Request;
+use App\Jobs\SendProductCreatedNotification;
 
 class ProductController extends Controller
 {
@@ -36,6 +37,8 @@ class ProductController extends Controller
     {
         $product = Product::create($request->validated());
         
+        SendProductCreatedNotification::dispatch($product)->afterCommit();
+
         return redirect()
             ->route('products.show', $product)
             ->with('success', 'Продукт успешно создан');
