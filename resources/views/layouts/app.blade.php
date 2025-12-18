@@ -1,46 +1,44 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="utf-8">
-    <title>{{ $title ?? 'Product Manager Test' }}</title>
+    <title>{{ $title ?? 'ProductManagerTest' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-slate-100 text-slate-900">
-    <div class="min-h-screen">
-        <header class="bg-white shadow">
-            <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-                <a href="{{ route('products.index') }}" class="font-semibold text-lg">
-                    ProductManagerTest
-                </a>
 
-                <nav class="space-x-4 text-sm">
-                    <a href="{{ route('products.index') }}">Products</a>
-                    <a href="{{ route('products.create') }}">Create</a>
-                </nav>
+<body class="bg-white">
+<div class="min-h-screen flex">
+
+    <aside class="w-[181px] bg-[#374050] text-white">
+        <div class="h-[59px]"></div>
+
+        <nav class="px-8 pt-3">
+            <a href="{{ route('products.index') }}"
+            class="block text-[12px] leading-[11px] text-white/70">
+                Продукты
+            </a>
+        </nav>
+    </aside>
+
+    <div class="flex-1">
+        <header class="h-[59px] bg-white flex items-center justify-between">
+            <div class="pl-[18px] text-[11px] leading-[11px] text-[#ED1C24] uppercase">
+                ПРОДУКТЫ
+            </div>
+
+            <div class="pr-[31px] text-[11px] leading-[11px] text-[#A6AFB8]">
+                Иванов Иван Иванович
             </div>
         </header>
 
-        <main class="max-w-5xl mx-auto px-4 py-6">
-            @if (session('success'))
-                <div class="mb-4 rounded border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm">
-                    {{ session('success') }}
-                </div>
-            @endif
+        <div class="ml-[18px] h-[3px] w-[60px] bg-[#ED1C24]"></div>
 
-            @if ($errors->any())
-                <div class="mb-4 rounded border border-rose-300 bg-rose-50 px-4 py-2 text-sm">
-                    <ul class="list-disc list-inside">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
+        <main class="bg-[#F2F6FA] min-h-[calc(100vh-62px)]">
             @yield('content')
         </main>
     </div>
+
+</div>
 </body>
 </html>

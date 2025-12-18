@@ -1,73 +1,65 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="flex items-center justify-between mb-4">
-        <h1 class="text-xl font-semibold">Products</h1>
-        <a href="{{ route('products.create') }}"
-           class="rounded bg-slate-900 px-4 py-2 text-sm text-white">
-            + New product
-        </a>
+    @php
+        $buttonTopOffset = 'mt-[27px]';
+    @endphp
+
+    <div class="pt-[6px] flex items-start">
+        <div>
+            <div class="w-[630px] grid items-center h-[25px] px-[18px]"
+                 style="grid-template-columns: 152px 150px 151px 177px;">
+                <div class="text-[9px] leading-[11px] text-[#6E6E6F] uppercase">АРТИКУЛ</div>
+                <div class="text-[9px] leading-[11px] text-[#6E6E6F] uppercase">НАЗВАНИЕ</div>
+                <div class="text-[9px] leading-[11px] text-[#6E6E6F] uppercase">СТАТУС</div>
+                <div class="text-[9px] leading-[11px] text-[#6E6E6F] uppercase">АТРИБУТЫ</div>
+            </div>
+
+            <div class="w-[630px] border-t border-[#C4C4C4] mt-[6px]"></div>
+
+            <div class="w-[630px] bg-white border-x border-[#C4C4C4] border-b border-[#C4C4C4]">
+                @forelse($products as $product)
+                    @php
+                        $statusLabel = $product->status === 'available' ? 'Доступен' : 'Не доступен';
+                        $color = $product->data['color'] ?? null;
+                        $size  = $product->data['size'] ?? null;
+                    @endphp
+
+                    <div class="h-[56px] grid items-center text-[11px] leading-[11px] text-[#6E6E6F] px-[18px]"
+                         style="grid-template-columns: 152px 150px 151px 177px;">
+                        <div>
+                            <a href="{{ route('products.show', $product) }}" class="hover:underline">
+                                {{ $product->article }}
+                            </a>
+                        </div>
+
+                        <div>{{ $product->name }}</div>
+
+                        <div>{{ $statusLabel }}</div>
+
+                        <div class="leading-[13px]">
+                            <div>{{ $color ? 'Цвет: '.$color : '—' }}</div>
+                            <div>{{ $size ? 'Размер: '.$size : '' }}</div>
+                        </div>
+                    </div>
+
+                    @if(! $loop->last)
+                        <div class="border-t border-[#C4C4C4]"></div>
+                    @endif
+                @empty
+                    <div class="px-0 py-6 text-[11px] text-[#6E6E6F]">Нет продуктов</div>
+                @endforelse
+            </div>
+        </div>
+
+        <div class="flex-1 pr-[31px]">
+            <div class="flex justify-end {{ $buttonTopOffset }}">
+                <a href="{{ route('products.create') }}"
+                   class="w-[136px] h-[30px] rounded-[6px] bg-[#0FC5FF] text-white
+                          text-[11px] leading-[11px] font-medium inline-flex items-center justify-center">
+                    Добавить
+                </a>
+            </div>
+        </div>
     </div>
-
-    @if($products->isEmpty())
-        <p class="text-sm text-slate-500">No products yet.</p>
-    @else
-        <div class="bg-white rounded shadow-sm overflow-hidden">
-            <table class="min-w-full text-sm">
-                <thead class="bg-slate-50">
-                <tr>
-                    <th class="px-4 py-2 text-left">ID</th>
-                    <th class="px-4 py-2 text-left">Article</th>
-                    <th class="px-4 py-2 text-left">Name</th>
-                    <th class="px-4 py-2 text-left">Status</th>
-                    <th class="px-4 py-2 text-right">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach($products as $product)
-                    <tr class="border-t">
-                        <td class="px-4 py-2">{{ $product->id }}</td>
-                        <td class="px-4 py-2">{{ $product->article }}</td>
-                        <td class="px-4 py-2">
-                            <a href="{{ route('products.show', $product) }}"
-                               class="text-sky-700 hover:underline">
-                                {{ $product->name }}
-                            </a>
-                        </td>
-                        <td class="px-4 py-2">
-                            <span class="inline-flex rounded-full px-2 py-0.5 text-xs
-                                {{ $product->status === 'available'
-                                    ? 'bg-emerald-50 text-emerald-700'
-                                    : 'bg-slate-100 text-slate-600' }}">
-                                {{ ucfirst($product->status) }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-2 text-right space-x-2">
-                            <a href="{{ route('products.edit', $product) }}"
-                               class="text-xs text-sky-700 hover:underline">
-                                Edit
-                            </a>
-
-                            <form action="{{ route('products.destroy', $product) }}"
-                                  method="POST"
-                                  class="inline-block"
-                                  onsubmit="return confirm('Delete this product?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                        class="text-xs text-rose-700 hover:underline">
-                                    Delete
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <div class="mt-4">
-            {{ $products->links() }}
-        </div>
-    @endif
 @endsection
