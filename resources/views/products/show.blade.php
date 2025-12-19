@@ -1,62 +1,82 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="flex items-center justify-between mb-4">
-        <div>
-            <h1 class="text-xl font-semibold">{{ $product->name }}</h1>
-            <p class="text-xs text-slate-500">
-                Article: {{ $product->article }} · ID: {{ $product->id }}
-            </p>
-        </div>
+    @php
+        $statusLabel = $product->status === 'available' ? 'Доступен' : 'Не доступен';
+        $color = $product->data['color'] ?? null;
+        $size  = $product->data['size'] ?? null;
+        $attrsText = trim(
+            ($color ? 'Цвет: ' . $color : '') . ($size ? "\nРазмер: " . $size : '')
+        );
+    @endphp
 
-        <div class="space-x-2">
+    <div class="pt-[17px] pl-0">
+        <div class="relative w-[630px] h-[387px] bg-[#374050] border border-black">
+
+            {{-- Title --}}
+            <div class="absolute left-[12px] top-[27px] text-white font-bold text-[20px] leading-[11px]">
+                {{ $product->name }}
+            </div>
+
+            {{-- Actions (edit, delete) --}}
             <a href="{{ route('products.edit', $product) }}"
-               class="rounded bg-slate-900 px-3 py-2 text-xs text-white">
-                Edit
+               class="absolute left-[545px] top-[23px] w-[20px] h-[20px] bg-black/40 flex items-center justify-center"
+               title="Редактировать">
+                {{-- pencil icon --}}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Z" fill="rgba(196,196,196,0.7)"/>
+                    <path d="M20.71 7.04a1.0 1.0 0 0 0 0-1.41l-2.34-2.34a1.0 1.0 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"
+                          fill="rgba(196,196,196,0.7)"/>
+                </svg>
             </a>
+
+            <form action="{{ route('products.destroy', $product) }}"
+                  method="POST"
+                  class="absolute left-[567px] top-[23px]"
+                  onsubmit="return confirm('Удалить продукт?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                        class="w-[20px] h-[20px] bg-black/40 flex items-center justify-center"
+                        title="Удалить">
+                    {{-- trash icon --}}
+                    <svg width="10" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M7 21a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7H7v14Zm12-16h-3.5l-1-1h-5l-1 1H5v2h14V5Z"
+                              fill="rgba(196,196,196,0.7)"/>
+                    </svg>
+                </button>
+            </form>
+
+            {{-- Close --}}
             <a href="{{ route('products.index') }}"
-               class="text-xs text-slate-600 underline">
-                Back to list
+               class="absolute left-[595px] top-[18px] w-[30px] h-[30px] flex items-center justify-center"
+               title="Закрыть">
+                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+                    <path d="M9 9L21 21" stroke="#C4C4C4" stroke-width="2" stroke-linecap="square"/>
+                    <path d="M21 9L9 21" stroke="#C4C4C4" stroke-width="2" stroke-linecap="square"/>
+                </svg>
             </a>
-        </div>
-    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="md:col-span-2 bg-white rounded shadow-sm p-4 text-sm space-y-3">
-            <div>
-                <div class="text-xs text-slate-500 mb-1">Status</div>
-                <span class="inline-flex rounded-full px-2 py-0.5 text-xs
-                    {{ $product->status === 'available'
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-slate-100 text-slate-600' }}">
-                    {{ ucfirst($product->status) }}
-                </span>
+            {{-- Fields --}}
+            <div class="absolute left-[12px] top-[68px] text-[11px] leading-[11px] text-white/70">Артикул</div>
+            <div class="absolute left-[91px] top-[68px] text-[11px] leading-[11px] text-white">
+                {{ $product->article }}
             </div>
 
-            <div>
-                <div class="text-xs text-slate-500 mb-1">Color</div>
-                <div>{{ $product->data['color'] ?? '—' }}</div>
+            <div class="absolute left-[12px] top-[97px] text-[11px] leading-[11px] text-white/70">Название</div>
+            <div class="absolute left-[91px] top-[97px] text-[11px] leading-[11px] text-white">
+                {{ $product->name }}
             </div>
 
-            <div>
-                <div class="text-xs text-slate-500 mb-1">Size</div>
-                <div>{{ $product->data['size'] ?? '—' }}</div>
+            <div class="absolute left-[12px] top-[126px] text-[11px] leading-[11px] text-white/70">Статус</div>
+            <div class="absolute left-[91px] top-[126px] text-[11px] leading-[11px] text-white">
+                {{ $statusLabel }}
             </div>
 
-            <div>
-                <div class="text-xs text-slate-500 mb-1">Raw data</div>
-                <pre class="text-xs bg-slate-50 rounded p-2 overflow-x-auto">
-{{ json_encode($product->data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}
-                </pre>
+            <div class="absolute left-[12px] top-[155px] text-[11px] leading-[11px] text-white/70">Атрибуты</div>
+            <div class="absolute left-[91px] top-[155px] text-[11px] leading-[13px] text-white whitespace-pre-line">
+                {{ $attrsText !== '' ? $attrsText : '—' }}
             </div>
-        </div>
-
-        <div class="bg-white rounded shadow-sm p-4 text-xs text-slate-600 space-y-1">
-            <div>Created at: {{ $product->created_at }}</div>
-            <div>Updated at: {{ $product->updated_at }}</div>
-            @if($product->deleted_at)
-                <div>Deleted at: {{ $product->deleted_at }}</div>
-            @endif
         </div>
     </div>
 @endsection
