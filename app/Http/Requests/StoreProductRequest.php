@@ -18,6 +18,8 @@ class StoreProductRequest extends FormRequest
             'article' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9]+$/', 'unique:products,article'],
             'status'  => ['required', 'in:available,unavailable'],
             'data'    => ['nullable', 'array'],
+            'data.*.key' => ['nullable', 'string', 'max:255'],
+            'data.*.value' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

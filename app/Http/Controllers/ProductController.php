@@ -2,41 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-use Illuminate\Http\Request;
 use App\Jobs\SendProductCreatedNotification;
+use App\Models\Product;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $products = Product::query()
-            ->available()
-            ->latest()
-            ->paginate(10);
-        return view('products.index', compact('products'));
+        return $this->renderIndex();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return view('products.create');
+        return $this->renderIndex(panel: 'create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function show(Product $product)
+    {
+        return $this->renderIndex(panel: 'show', product: $product);
+    }
+
+    public function edit(Product $product)
+    {
+        return $this->renderIndex(panel: 'edit', product: $product);
+    }
+
     public function store(StoreProductRequest $request)
     {
-        $product = Product::create($request->validated());
-        
+        $payload = $request->validated();
+        $payload['data'] = $this->normalizeAttributes($payload['data'] ?? null);
+
+        $product = Product::create($payload);
+
         SendProductCreatedNotification::dispatch($product)->afterCommit();
 
         return redirect()
@@ -44,43 +43,58 @@ class ProductController extends Controller
             ->with('success', 'Продукт успешно создан');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Product $product)
-    {
-        return view('products.show', compact('product'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Product $product)
-    {
-        return view('products.edit', compact('product'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        $product->update($request->validated());
-        
+        $payload = $request->validated();
+        $payload['data'] = $this->normalizeAttributes($payload['data'] ?? null);
+
+        $product->update($payload);
+
         return redirect()
             ->route('products.show', $product)
             ->with('success', 'Продукт успешно обновлен');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Product $product)
     {
         $product->delete();
-        
+
         return redirect()
             ->route('products.index')
             ->with('success', 'Продукт успешно удален');
+    }
+
+    private function renderIndex(?string $panel = null, ?Product $product = null)
+    {
+        $products = Product::query()
+            ->latest()
+            ->paginate(10);
+
+        return view('products.index', compact('products', 'panel', 'product'));
+    }
+
+    /**
+     * UI отправляет: data[0][key], data[0][value] ...
+     * В БД храним ассоц массив: { "Цвет": "черный", "Размер": "L" }
+     */
+    private function normalizeAttributes($data): ?array
+    {
+        if (!is_array($data)) {
+            return null;
+        }
+
+        $assoc = [];
+        foreach ($data as $row) {
+            $key = trim((string)($row['key'] ?? ''));
+            $value = (string)($row['value'] ?? '');
+
+            if ($key === '') {
+                continue;
+            }
+
+            $assoc[$key] = $value;
+        }
+
+        return $assoc ?: null;
     }
 }
