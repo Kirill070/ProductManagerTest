@@ -1,138 +1,142 @@
 @php
     $isEdit = ($mode ?? '') === 'edit';
+
+    $inputBase = 'bg-white rounded-[10px] h-[64px] px-6 text-[20px] text-black outline-none w-full';
+    $labelBase = 'block text-white text-[18px] mb-3';
 @endphp
 
-<div class="p-6">
-    <div class="flex items-start justify-between gap-4">
-        <h2 class="text-xl font-semibold leading-tight">{{ $title }}</h2>
+<div class="h-full bg-[#363F50]">
+    <div class="px-[32px] pt-[26px] pb-[40px]">
+        <div class="flex items-start justify-between">
+            <h2 class="text-white text-[44px] font-semibold leading-tight">
+                {{ $title }}
+            </h2>
 
-        <a href="{{ route('products.index') }}"
-           class="inline-flex h-9 w-9 items-center justify-center rounded hover:bg-slate-600/70"
-           title="Закрыть">
-            ✕
-        </a>
-    </div>
-
-    @if ($errors->any())
-        <div class="mt-4 rounded border border-rose-300 bg-rose-50 px-4 py-3 text-rose-900 text-sm">
-            <div class="font-semibold mb-1">Проверь поля формы:</div>
-            <ul class="list-disc pl-5 space-y-1">
-                @foreach($errors->all() as $e)
-                    <li>{{ $e }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <form class="mt-6 space-y-4" action="{{ $action }}" method="POST" id="productForm">
-        @csrf
-        @if(($method ?? 'POST') !== 'POST')
-            @method($method)
-        @endif
-
-        {{-- Article --}}
-        <div>
-            <label class="block text-sm text-slate-300 mb-1">Артикул</label>
-            <input name="article" value="{{ $form['article'] }}"
-                   class="w-full rounded bg-slate-600/40 border border-slate-500 px-3 py-2 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500"
-                   placeholder="mtokb2">
-            @error('article')
-            <div class="mt-1 text-sm text-rose-300">{{ $message }}</div>
-            @enderror
+            <a href="{{ route('products.index') }}" class="opacity-70 hover:opacity-100" title="Закрыть">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="#C3C3C3" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+            </a>
         </div>
 
-        {{-- Name --}}
-        <div>
-            <label class="block text-sm text-slate-300 mb-1">Название</label>
-            <input name="name" value="{{ $form['name'] }}"
-                   class="w-full rounded bg-slate-600/40 border border-slate-500 px-3 py-2 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500"
-                   placeholder="MTOK-B2/216-1KT3645-K">
-            @error('name')
-            <div class="mt-1 text-sm text-rose-300">{{ $message }}</div>
-            @enderror
-        </div>
+        <form class="mt-10" action="{{ $action }}" method="POST" id="productForm">
+            @csrf
+            @if(($method ?? 'POST') !== 'POST')
+                @method($method)
+            @endif
 
-        {{-- Status --}}
-        <div>
-            <label class="block text-sm text-slate-300 mb-1">Статус</label>
-            <select name="status"
-                    class="w-full rounded bg-slate-600/40 border border-slate-500 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500">
-                <option value="available" @selected(($form['status'] ?? 'available') === 'available')>Доступен</option>
-                <option value="unavailable" @selected(($form['status'] ?? '') === 'unavailable')>Не доступен</option>
-            </select>
-            @error('status')
-            <div class="mt-1 text-sm text-rose-300">{{ $message }}</div>
-            @enderror
-        </div>
+            <div class="max-w-[980px] space-y-8">
+                <div>
+                    <label class="{{ $labelBase }}">Артикул</label>
+                    <input name="article" value="{{ $form['article'] }}" class="{{ $inputBase }}">
+                    @error('article')
+                        <div class="mt-2 text-[#FF8080] text-sm">{{ $message }}</div>
+                    @enderror
+                </div>
 
-        {{-- Attributes --}}
-        <div class="pt-2">
-            <div class="flex items-center justify-between">
-                <div class="text-sm text-slate-300">Атрибуты</div>
+                <div>
+                    <label class="{{ $labelBase }}">Название</label>
+                    <input name="name" value="{{ $form['name'] }}" class="{{ $inputBase }}">
+                    @error('name')
+                        <div class="mt-2 text-[#FF8080] text-sm">{{ $message }}</div>
+                    @enderror
+                </div>
 
-                <button type="button" id="addAttrBtn"
-                        class="text-sm text-slate-100 hover:text-white">
-                    + Добавить атрибут
-                </button>
-            </div>
+                <div>
+                    <label class="{{ $labelBase }}">Статус</label>
 
-            <div class="mt-3 space-y-2" id="attrsContainer">
-                @foreach($rows as $i => $row)
-                    <div class="grid grid-cols-12 gap-2 attr-row">
-                        <div class="col-span-5">
-                            <input name="data[{{ $i }}][key]" value="{{ $row['key'] ?? '' }}"
-                                   class="w-full rounded bg-slate-600/40 border border-slate-500 px-3 py-2 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                   placeholder="Название">
-                        </div>
-                        <div class="col-span-6">
-                            <input name="data[{{ $i }}][value]" value="{{ $row['value'] ?? '' }}"
-                                   class="w-full rounded bg-slate-600/40 border border-slate-500 px-3 py-2 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                   placeholder="Значение">
-                        </div>
-                        <div class="col-span-1 flex items-center justify-end">
-                            <button type="button" class="remove-attr h-9 w-9 rounded hover:bg-slate-600/70" title="Удалить">
-                                🗑
-                            </button>
-                        </div>
+                    <div class="relative">
+                        <select name="status"
+                                class="{{ $inputBase }} appearance-none pr-14">
+                            <option value="available" @selected(($form['status'] ?? 'available') === 'available')>Доступен</option>
+                            <option value="unavailable" @selected(($form['status'] ?? '') === 'unavailable')>Не доступен</option>
+                        </select>
 
-                        {{-- точечные ошибки на строку --}}
-                        <div class="col-span-12 -mt-1">
-                            @error("data.$i.key")
-                            <div class="text-sm text-rose-300">{{ $message }}</div>
-                            @enderror
-                            @error("data.$i.value")
-                            <div class="text-sm text-rose-300">{{ $message }}</div>
-                            @enderror
+                        <div class="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                <path d="M6 9l6 6 6-6" stroke="#BDBDBD" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
                         </div>
                     </div>
-                @endforeach
-            </div>
-        </div>
 
-        <div class="pt-2">
-            <button type="submit"
-                    class="inline-flex items-center rounded bg-red-600 px-5 py-2 text-sm font-medium text-white hover:bg-red-700">
-                {{ $buttonText }}
-            </button>
-        </div>
-    </form>
+                    @error('status')
+                        <div class="mt-2 text-[#FF8080] text-sm">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="pt-2">
+                    <div class="text-white text-[32px] font-semibold">Атрибуты</div>
+
+                    <div class="mt-8 space-y-7" id="attrsContainer">
+                        @foreach($rows as $i => $row)
+                            <div class="attr-row">
+                                <div class="flex gap-6 items-end">
+                                    <div class="w-[460px] max-w-full">
+                                        <label class="{{ $labelBase }}">Название</label>
+                                        <input name="data[{{ $i }}][key]" value="{{ $row['key'] ?? '' }}" class="{{ $inputBase }} h-[62px] text-[18px]">
+                                        @error("data.$i.key")
+                                            <div class="mt-2 text-[#FF8080] text-sm">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="w-[460px] max-w-full">
+                                        <label class="{{ $labelBase }}">Значение</label>
+                                        <input name="data[{{ $i }}][value]" value="{{ $row['value'] ?? '' }}" class="{{ $inputBase }} h-[62px] text-[18px]">
+                                        @error("data.$i.value")
+                                            <div class="mt-2 text-[#FF8080] text-sm">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <button type="button" class="remove-attr mb-[6px] opacity-60 hover:opacity-100" title="Удалить">
+                                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                                            <path d="M3 6h18" stroke="#9AA3AD" stroke-width="2" stroke-linecap="round"/>
+                                            <path d="M8 6V4h8v2" stroke="#9AA3AD" stroke-width="2" stroke-linecap="round"/>
+                                            <path d="M6 6l1 16h10l1-16" stroke="#9AA3AD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M10 11v6M14 11v6" stroke="#9AA3AD" stroke-width="2" stroke-linecap="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <button type="button" id="addAttrBtn"
+                            class="mt-6 text-[#0EC5FF] underline text-[18px]">
+                        + Добавить атрибут
+                    </button>
+                </div>
+
+                <div class="pt-6">
+                    <button type="submit"
+                            class="h-[76px] w-[320px] rounded-[10px] bg-[#0EC5FF] text-white text-[22px] font-semibold">
+                        {{ $buttonText }}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 <template id="attrTemplate">
-    <div class="grid grid-cols-12 gap-2 attr-row">
-        <div class="col-span-5">
-            <input name="data[__INDEX__][key]"
-                   class="w-full rounded bg-slate-600/40 border border-slate-500 px-3 py-2 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500"
-                   placeholder="Название">
-        </div>
-        <div class="col-span-6">
-            <input name="data[__INDEX__][value]"
-                   class="w-full rounded bg-slate-600/40 border border-slate-500 px-3 py-2 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500"
-                   placeholder="Значение">
-        </div>
-        <div class="col-span-1 flex items-center justify-end">
-            <button type="button" class="remove-attr h-9 w-9 rounded hover:bg-slate-600/70" title="Удалить">
-                🗑
+    <div class="attr-row">
+        <div class="flex gap-6 items-end">
+            <div class="w-[460px] max-w-full">
+                <label class="block text-white text-[18px] mb-3">Название</label>
+                <input name="data[__INDEX__][key]" class="bg-white rounded-[10px] h-[62px] px-6 text-[18px] text-black outline-none w-full">
+            </div>
+
+            <div class="w-[460px] max-w-full">
+                <label class="block text-white text-[18px] mb-3">Значение</label>
+                <input name="data[__INDEX__][value]" class="bg-white rounded-[10px] h-[62px] px-6 text-[18px] text-black outline-none w-full">
+            </div>
+
+            <button type="button" class="remove-attr mb-[6px] opacity-60 hover:opacity-100" title="Удалить">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 6h18" stroke="#9AA3AD" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M8 6V4h8v2" stroke="#9AA3AD" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M6 6l1 16h10l1-16" stroke="#9AA3AD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M10 11v6M14 11v6" stroke="#9AA3AD" stroke-width="2" stroke-linecap="round"/>
+                </svg>
             </button>
         </div>
     </div>

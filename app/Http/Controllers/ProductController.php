@@ -39,7 +39,7 @@ class ProductController extends Controller
         SendProductCreatedNotification::dispatch($product)->afterCommit();
 
         return redirect()
-            ->route('products.show', $product)
+            ->route('products.index')
             ->with('success', 'Продукт успешно создан');
     }
 
@@ -51,7 +51,7 @@ class ProductController extends Controller
         $product->update($payload);
 
         return redirect()
-            ->route('products.show', $product)
+            ->route('products.index')
             ->with('success', 'Продукт успешно обновлен');
     }
 
